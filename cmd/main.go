@@ -1,31 +1,39 @@
 package main
 
 import (
+    "fmt"
     "log"
     "net/http"
+    "os"
 
     "github.com/gorilla/mux"
     
-    "health-tracking-api/database"
-    "health-tracking-api/handlers"
+    "github.com/NucleonGodX/health-monitor-api/internal/database"
+    "github.com/NucleonGodX/health-monitor-api/pkg/handlers"
 )
 
 func main() {
-    // Initialize database connection
-    database.InitDB()
-    defer database.CloseDB()
 
-    // Create router
+    err := database.InitDB()
+    if err != nil {
+        log.Fatalf("Database initialization failed: %v", err)
+    }
+    defer database.CloseDB()
     r := mux.NewRouter()
 
-    // Define routes
-    r.HandleFunc("/api/data", handlers.ReceiveData).Methods("POST")
-    r.HandleFunc("/api/devices/register", handlers.RegisterDevice).Methods("POST")
-    r.HandleFunc("/api/data/last", handlers.GetLastRecord).Methods("GET")
-    r.HandleFunc("/api/data/recent", handlers.GetRecentRecords).Methods("GET")
-    r.HandleFunc("/api/data/filter", handlers.GetFilteredRecords).Methods("GET")
+    r.HandleFunc("/api/devices", handlers.CreateDevice).Methods("POST")
+    r.HandleFunc("/api/devices", handlers.GetDeviceByID).Methods("GET")
+    r.HandleFunc("/api/devices/list", handlers.ListDevices).Methods("GET")
 
-    // Start server
-    log.Println("Server starting on :8080")
-    log.Fatal(http.ListenAndServe(":8080", r))
+    r.HandleFunc("/api/health", handlers.AddHealthRecord).Methods("POST")
+    r.HandleFunc("/api/health/latest", handlers.GetLatestHealthRecord).Methods("GET")
+    r.HandleFunc("/api/health/records", handlers.GetHealthRecords).Methods("GET")
+
+    port := os.Getenv("SERVER_PORT")
+    if port == "" {
+        port = "8080"
+    }
+    serverAddr := fmt.Sprintf(":%s", port)
+    log.Printf("Server starting on %s", serverAddr)
+    log.Fatal(http.ListenAndServe(serverAddr, r))
 }
