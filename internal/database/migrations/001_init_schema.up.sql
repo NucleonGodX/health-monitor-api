@@ -21,10 +21,12 @@ CREATE TABLE health_records (
     pulse INTEGER CHECK (pulse BETWEEN 0 AND 300),
     temperature DECIMAL(4,1) CHECK (temperature BETWEEN 95.0 AND 106.0),
     recorded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,  
+
     -- Foreign key constraint
     FOREIGN KEY (device_id) REFERENCES devices(device_id) ON DELETE CASCADE
 );
+
 
 -- Indexes for performance
 CREATE INDEX idx_health_records_device_id ON health_records(device_id);

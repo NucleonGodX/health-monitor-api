@@ -1,0 +1,1 @@
+ALTER TABLE health_records DROP COLUMN created_at;

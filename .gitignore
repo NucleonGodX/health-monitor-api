@@ -1,0 +1,20 @@
+# Environment files
+.env
+*.env
+
+# Compiled files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Dependency directories
+vendor/
+go.sum
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Logs
+*.log

@@ -2,42 +2,48 @@ package database
 
 import (
     "database/sql"
-    "fmt"
     "log"
     "os"
-
+    "fmt"
     _ "github.com/lib/pq"
     "github.com/joho/godotenv"
 )
 
 var DB *sql.DB
 
-func InitDB() {
-    err := godotenv.Load()
+func InitDB() error {
+    // Get absolute path to the root directory
+    rootDir, err := os.Getwd()
     if err != nil {
-        log.Fatal("Error loading .env file")
+        log.Fatal("Failed to get working directory:", err)
+    }
+    envPath := rootDir + "/configs/.env"
+    err = godotenv.Load(envPath)
+    if err != nil {
+        log.Println("Error loading .env file from", envPath, ", using system environment")
     }
 
-    connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=require",
-        os.Getenv("DB_USER"),
-        os.Getenv("DB_PASSWORD"),
-        os.Getenv("DB_HOST"),
-        os.Getenv("DB_NAME"),
-    )
+    connectionString := os.Getenv("DB_CONNECTION_STRING")
+    if connectionString == "" {
+        log.Fatal("DB_CONNECTION_STRING is not set")
+    }
 
-    db, err := sql.Open("postgres", connStr)
+    db, err := sql.Open("postgres", connectionString)
     if err != nil {
-        log.Fatal(err)
+        return fmt.Errorf("error opening database: %v", err)
     }
 
     err = db.Ping()
     if err != nil {
-        log.Fatal(err)
+        return fmt.Errorf("error connecting to the database: %v", err)
     }
 
     DB = db
-    log.Println("Connected to PostgreSQL database")
+    log.Println("Successfully connected to the database")
+
+    return nil
 }
+
 
 func CloseDB() {
     if DB != nil {
