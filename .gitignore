@@ -1,6 +1,6 @@
-# Environment files
+# Ignore environment files
 .env
-*.env
+configs/.env
 
 # Compiled files
 *.exe
